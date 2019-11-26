@@ -1,8 +1,8 @@
 #include <dirent.h>
 #include <unistd.h>
+#include <iomanip>
 #include <string>
 #include <vector>
-#include <iomanip>
 
 #include "linux_parser.h"
 
@@ -68,7 +68,7 @@ vector<int> LinuxParser::Pids() {
 }
 
 float LinuxParser::MemoryUtilization() {
-  string line, key;
+  std::string line, key;
   float memTotal, memFree, value;
   std::ifstream filestream(kProcDirectory + kMeminfoFilename);
   if (filestream.is_open()) {
@@ -81,6 +81,7 @@ float LinuxParser::MemoryUtilization() {
         }
         if (key == "MemFree") {
           memFree = value;
+          break;
         }
       }
     }
@@ -160,14 +161,14 @@ string LinuxParser::Command(int pid) {
   return string();
 }
 
-string LinuxParser::Ram(int pid) { 
+string LinuxParser::Ram(int pid) {
   string line, key, value;
   std::ifstream filestream(kProcDirectory + to_string(pid) + kStatusFilename);
-  if (filestream.is_open()){
+  if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
       std::istringstream linestream(line);
       while (linestream >> key >> value) {
-        if (key == "VmSize:"){
+        if (key == "VmSize:") {
           std::stringstream ram;
           ram << std::fixed << std::setprecision(3) << stof(value) / 1000;
           return ram.str();
