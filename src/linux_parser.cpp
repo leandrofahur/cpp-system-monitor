@@ -182,29 +182,42 @@ string LinuxParser::Ram(int pid) {
 }
 
 string LinuxParser::Uid(int pid) {
-
-    std::string line, key, value;
-    std::ifstream filestream(kProcDirectory + std::to_string(pid) +
-                             kStatusFilename);
-    if (filestream.is_open()) {
-      while (std::getline(filestream, line)) {
-        std::replace(line.begin(), line.end(), ':', ' ');
-        std::istringstream linestream(line);
-        while (linestream >> key >> value) {
-          if (key == "Uid") {
-            return value;
-            break;
-          }
+  std::string line, key, value;
+  std::ifstream filestream(kProcDirectory + std::to_string(pid) +
+                           kStatusFilename);
+  if (filestream.is_open()) {
+    while (std::getline(filestream, line)) {
+      std::replace(line.begin(), line.end(), ':', ' ');
+      std::istringstream linestream(line);
+      while (linestream >> key >> value) {
+        if (key == "Uid") {
+          return value;
+          break;
         }
       }
     }
-    return string();
   }
+  return string();
+}
 
-  // TODO: Read and return the user associated with a process
-  // REMOVE: [[maybe_unused]] once you define the function
-  string LinuxParser::User(int pid[[maybe_unused]]) { return string(); }
+string LinuxParser::User(int pid) {
+  std::string line, key, value, uid;
+  std::ifstream filestream(kPasswordPath);
+  if (filestream.is_open()) {
+    while (std::getline(filestream, line)) {
+      std::replace(line.begin(), line.end(), ':', ' ');
+      std::istringstream linestream(line);
+      while (linestream >> key >> value >> uid) {
+        if (uid == LinuxParser::Uid(pid)) {
+          return key;
+          break;
+        }
+      }
+    }
+  }
+  return string();
+}
 
-  // TODO: Read and return the uptime of a process
-  // REMOVE: [[maybe_unused]] once you define the function
-  long LinuxParser::UpTime(int pid[[maybe_unused]]) { return 0; }
+// TODO: Read and return the uptime of a process
+// REMOVE: [[maybe_unused]] once you define the function
+long LinuxParser::UpTime(int pid[[maybe_unused]]) { return 0; }
