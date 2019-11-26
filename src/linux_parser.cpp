@@ -166,9 +166,10 @@ string LinuxParser::Ram(int pid) {
   std::ifstream filestream(kProcDirectory + std::to_string(pid) + kStatusFilename);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
+      std::replace(line.begin(), line.end(), ':', ' ');
       std::istringstream linestream(line);
       while (linestream >> key >> value) {
-        if (key == "VmSize:") {
+        if (key == "VmSize") {
           std::stringstream ram;
           ram << std::fixed << std::setprecision(3) << stof(value) / 1000;
           return ram.str();
