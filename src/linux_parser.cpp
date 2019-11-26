@@ -163,7 +163,7 @@ string LinuxParser::Command(int pid) {
 
 string LinuxParser::Ram(int pid) {
   std::string line, key, value;
-  std::ifstream filestream(kProcDirectory + to_string(pid) + kStatusFilename);
+  std::ifstream filestream(kProcDirectory + std::to_string(pid) + kStatusFilename);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
       std::istringstream linestream(line);
