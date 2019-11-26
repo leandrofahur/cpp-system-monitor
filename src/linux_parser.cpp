@@ -218,7 +218,7 @@ string LinuxParser::User(int pid) {
   return string();
 }
 
-long LinuxParser::UpTime(int pid[[maybe_unused]]) {
+long LinuxParser::UpTime(int pid) {
   std::string line, value;
   std::vector<std::string> buffer;
   float time = 0;
@@ -227,14 +227,13 @@ long LinuxParser::UpTime(int pid[[maybe_unused]]) {
   if (filestream.is_open()) {
     std::getline(filestream, line);
     std::stringstream sstream(line);
-
     while (std::getline(sstream, line, ' ')) {
       buffer.push_back(line);  // std::cout << line << std::endl;
     }
-
-    // std::cout << line << std::endl;
-    // std::cout << line[22] << std::endl;
+    if (buffer.size() > 0) {
+      time = stof(buffer[21]);
+      return time;
+    }
   }
-  time = stof(buffer[22]);
   return time;
 }
