@@ -119,7 +119,7 @@ vector<string> LinuxParser::CpuUtilization() { return {}; }
 
 int LinuxParser::TotalProcesses() {
   int value = 0;
-  string line, key;
+  std::string line, key;
   std::ifstream filestream(kProcDirectory + kStatFilename);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
@@ -136,7 +136,7 @@ int LinuxParser::TotalProcesses() {
 
 int LinuxParser::RunningProcesses() {
   int value = 0;
-  string line, key;
+  std::string line, key;
   std::ifstream filestream(kProcDirectory + kStatFilename);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
@@ -151,18 +151,18 @@ int LinuxParser::RunningProcesses() {
 }
 
 string LinuxParser::Command(int pid) {
-  string line;
+  std::string line;
   std::ifstream filestream(kProcDirectory + std::to_string(pid) +
                            kCmdlineFilename);
   if (filestream.is_open()) {
     std::getline(filestream, line);
     return line;
   }
-  return string();
+  return std::string();
 }
 
 string LinuxParser::Ram(int pid) {
-  string line, key, value;
+  std::string line, key, value;
   std::ifstream filestream(kProcDirectory + to_string(pid) + kStatusFilename);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
