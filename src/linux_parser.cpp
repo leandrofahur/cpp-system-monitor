@@ -163,7 +163,8 @@ string LinuxParser::Command(int pid) {
 
 string LinuxParser::Ram(int pid) {
   std::string line, key, value;
-  std::ifstream filestream(kProcDirectory + std::to_string(pid) + kStatusFilename);
+  std::ifstream filestream(kProcDirectory + std::to_string(pid) +
+                           kStatusFilename);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
       std::replace(line.begin(), line.end(), ':', ' ');
@@ -180,14 +181,30 @@ string LinuxParser::Ram(int pid) {
   return std::to_string(0);
 }
 
-// TODO: Read and return the user ID associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Uid(int pid[[maybe_unused]]) { return string(); }
+string LinuxParser::Uid(int pid) {
 
-// TODO: Read and return the user associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::User(int pid[[maybe_unused]]) { return string(); }
+    std::string line, key, value;
+    std::ifstream filestream(kProcDirectory + std::to_string(pid) +
+                             kStatusFilename);
+    if (filestream.is_open()) {
+      while (std::getline(filestream, line)) {
+        std::replace(line.begin(), line.end(), ':', ' ');
+        std::istringstream linestream(line);
+        while (linestream >> key >> value) {
+          if (key == "Uid") {
+            return value;
+            break;
+          }
+        }
+      }
+    }
+    return string();
+  }
 
-// TODO: Read and return the uptime of a process
-// REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::UpTime(int pid[[maybe_unused]]) { return 0; }
+  // TODO: Read and return the user associated with a process
+  // REMOVE: [[maybe_unused]] once you define the function
+  string LinuxParser::User(int pid[[maybe_unused]]) { return string(); }
+
+  // TODO: Read and return the uptime of a process
+  // REMOVE: [[maybe_unused]] once you define the function
+  long LinuxParser::UpTime(int pid[[maybe_unused]]) { return 0; }
