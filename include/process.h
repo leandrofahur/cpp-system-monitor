@@ -18,11 +18,6 @@ class Process {
 
   // TODO: Declare any necessary private members
  private:
-    int pid_ = 0;
-    std::string user_ = {};
-    std::string command_ = {};
-    
-    
 };
 
 #endif
