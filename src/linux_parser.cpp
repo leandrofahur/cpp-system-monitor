@@ -107,33 +107,52 @@ long LinuxParser::Jiffies() {
   for (int i = kUser_; i <= kSteal_; i++) {
     jiffies += std::stol(cpuUtilization[i]);
   }
-  return 0;
+  return jiffies;
 }
 
-long LinuxParser::ActiveJiffies(int pid) { 
+long LinuxParser::ActiveJiffies(int pid) {
   std::vector<std::string> buffer;
   std::string line;
   long totalTime{0};
-  std::ifstream filestream(kProcDirectory + std::to_string(pid) + kStatFilename);
+  std::ifstream filestream(kProcDirectory + std::to_string(pid) +
+                           kStatFilename);
   if (filestream.is_open()) {
     std::getline(filestream, line);
     std::stringstream sstream(line);
     while (std::getline(sstream, line, ' ')) {
       buffer.push_back(line);  // std::cout << line << std::endl;
     }
-    totalTime = std::stol(buffer[13]) + std::stol(buffer[14]) + std::stol(buffer[15]) + std::stol(buffer[16]);
+    totalTime = std::stol(buffer[13]) + std::stol(buffer[14]) +
+                std::stol(buffer[15]) + std::stol(buffer[16]);
   }
-  return totalTime; 
+  return totalTime;
 }
 
-// TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { return 0; }
+long LinuxParser::ActiveJiffies() { return Jiffies() - IdleJiffies(); }
 
-// TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { return 0; }
+long LinuxParser::IdleJiffies() {
+  std::vector<std::string> cpuUtilization = CpuUtilization();
+  float idleJiffies{0};
+  for (int i = kIdle_; i <= kIOwait_; i++) {
+    idleJiffies += std::stol(cpuUtilization[i]);
+  }
+  return idleJiffies;
+}
 
-// TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() { return {}; }
+vector<string> LinuxParser::CpuUtilization() {
+  std::vector<std::string> buffer;
+  std::string line;
+  std::ifstream filestream(kProcDirectory + kStatFilename);
+  if (filestream.is_open()) {
+    std::getline(filestream, line);
+    std::stringstream sstream(line);
+    while (std::getline(sstream, line, ' ')) {
+      buffer.push_back(line);  // std::cout << line << std::endl;
+    }
+    
+  }
+  return buffer;
+}
 
 int LinuxParser::TotalProcesses() {
   int value = 0;
