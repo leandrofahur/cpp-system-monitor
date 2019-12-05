@@ -16,6 +16,9 @@ float Processor::Utilization() {
     activeJiffiesEnd = (float)LinuxParser::ActiveJiffies();
 
 
+    if((activeJiffiesEnd - activeJiffiesStart) <= 0) {
+        return 0.0f;
+    } 
+
     return ((jiffiesEnd - jiffiesStart)/(activeJiffiesEnd - activeJiffiesStart))*0.01;
-    return 0.0f;
 }

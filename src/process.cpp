@@ -25,11 +25,15 @@ float Process::CpuUtilization() {
     jiffieStart = (float)LinuxParser::Jiffies();
     uptimeStart = (float)LinuxParser::UpTime(this->pid_);
 
-    unsigned int microsseconds = 10000;
+    unsigned int microsseconds = 1000;
     usleep(microsseconds);
 
     jiffieEnd = (float)LinuxParser::Jiffies();
     upTimeEnd = (float)LinuxParser::UpTime(this->pid_);
+
+    if((upTimeEnd - uptimeStart) <= 0){
+        return 0.0f;
+    }
     
     return (jiffieEnd - jiffieStart)/(upTimeEnd - uptimeStart);
 }
