@@ -102,8 +102,8 @@ long LinuxParser::UpTime() {
 }
 
 long LinuxParser::Jiffies() {
-  std::vector<std::string> cpuUtilization = CpuUtilization();
-  float jiffies{0};
+  std::vector<std::string> cpuUtilization = LinuxParser::CpuUtilization();
+  long jiffies{0};
   for (int i = kUser_; i <= kSteal_; i++) {
     jiffies += std::stol(cpuUtilization[i]);
   }
@@ -128,11 +128,11 @@ long LinuxParser::ActiveJiffies(int pid) {
   return totalTime;
 }
 
-long LinuxParser::ActiveJiffies() { return Jiffies() - IdleJiffies(); }
+long LinuxParser::ActiveJiffies() { return LinuxParser::Jiffies() - LinuxParser::IdleJiffies(); }
 
 long LinuxParser::IdleJiffies() {
-  std::vector<std::string> cpuUtilization = CpuUtilization();
-  float idleJiffies{0};
+  std::vector<std::string> cpuUtilization = LinuxParser::CpuUtilization();
+  long idleJiffies{0};
   for (int i = kIdle_; i <= kIOwait_; i++) {
     idleJiffies += std::stol(cpuUtilization[i]);
   }
@@ -147,9 +147,10 @@ vector<string> LinuxParser::CpuUtilization() {
     std::getline(filestream, line);
     std::stringstream sstream(line);
     while (std::getline(sstream, line, ' ')) {
-      buffer.push_back(line);  // std::cout << line << std::endl;
+      if(line != "cpu"){
+        buffer.push_back(line);  // std::cout << line << std::endl;
+      }
     }
-    
   }
   return buffer;
 }
@@ -193,6 +194,9 @@ string LinuxParser::Command(int pid) {
                            kCmdlineFilename);
   if (filestream.is_open()) {
     std::getline(filestream, line);
+    if (line == "") {
+      return "";
+    }
     return line;
   }
   return std::string();
@@ -258,7 +262,7 @@ string LinuxParser::User(int pid) {
 long LinuxParser::UpTime(int pid) {
   std::string line, value;
   std::vector<std::string> buffer;
-  float time = 0;
+  long time = 0;
   std::ifstream filestream(kProcDirectory + std::to_string(pid) +
                            kStatFilename);
   if (filestream.is_open()) {
@@ -268,9 +272,9 @@ long LinuxParser::UpTime(int pid) {
       buffer.push_back(line);  // std::cout << line << std::endl;
     }
     if (buffer.size() > 0) {
-      time = stof(buffer[21]);
+      time = std::stol(buffer[21]) / sysconf(_SC_CLK_TCK);
       return time;
     }
   }
-  return time;
+  return 0l;
 }
