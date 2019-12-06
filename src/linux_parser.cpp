@@ -1,6 +1,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <string>
+#include <iomanip>
 #include <vector>
 
 #include "linux_parser.h"
@@ -184,11 +185,48 @@ int LinuxParser::RunningProcesses()
 }
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-std::string LinuxParser::Command(int pid[[maybe_unused]]) { return std::string(); }
+std::string LinuxParser::Command(int pid)
+{
+  std::string line;
+  std::ifstream filestream(kProcDirectory + std::to_string(pid) + kCmdlineFilename);
+  if (filestream.is_open())
+  {
+    std::getline(filestream, line);
+    if (line == "")
+    {
+      return "None";
+    }
+    return line;
+  }
+  return std::string();
+}
 
 // TODO: Read and return the memory used by a process
 // REMOVE: [[maybe_unused]] once you define the function
-std::string LinuxParser::Ram(int pid[[maybe_unused]]) { return std::string(); }
+std::string LinuxParser::Ram(int pid)
+{
+  std::string line, key, value;
+  std::ifstream filestream(kProcDirectory + std::to_string(pid) +
+                           kStatusFilename);
+  if (filestream.is_open())
+  {
+    while (std::getline(filestream, line))
+    {
+      std::replace(line.begin(), line.end(), ':', ' ');
+      std::istringstream linestream(line);
+      while (linestream >> key >> value)
+      {
+        if (key == "VmSize")
+        {
+          std::stringstream ram;
+          ram << std::fixed << std::setprecision(3) << stof(value) / 1000;
+          return ram.str();
+        }
+      }
+    }
+  }
+  return std::to_string(0);
+}
 
 // TODO: Read and return the user ID associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
