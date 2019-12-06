@@ -11,19 +11,24 @@
 // using std::vector;
 
 // DONE: An example of how to read data from the filesystem
-std::string LinuxParser::OperatingSystem() {
+std::string LinuxParser::OperatingSystem()
+{
   std::string line;
   std::string key;
   std::string value;
   std::ifstream filestream(kOSPath);
-  if (filestream.is_open()) {
-    while (std::getline(filestream, line)) {
+  if (filestream.is_open())
+  {
+    while (std::getline(filestream, line))
+    {
       std::replace(line.begin(), line.end(), ' ', '_');
       std::replace(line.begin(), line.end(), '=', ' ');
       std::replace(line.begin(), line.end(), '"', ' ');
       std::istringstream linestream(line);
-      while (linestream >> key >> value) {
-        if (key == "PRETTY_NAME") {
+      while (linestream >> key >> value)
+      {
+        if (key == "PRETTY_NAME")
+        {
           std::replace(value.begin(), value.end(), '_', ' ');
           return value;
         }
@@ -34,11 +39,13 @@ std::string LinuxParser::OperatingSystem() {
 }
 
 // DONE: An example of how to read data from the filesystem
-std::string LinuxParser::Kernel() {
+std::string LinuxParser::Kernel()
+{
   std::string os, version, kernel;
   std::string line;
   std::ifstream stream(kProcDirectory + kVersionFilename);
-  if (stream.is_open()) {
+  if (stream.is_open())
+  {
     std::getline(stream, line);
     std::istringstream linestream(line);
     linestream >> os >> version >> kernel;
@@ -47,16 +54,20 @@ std::string LinuxParser::Kernel() {
 }
 
 // BONUS: Update this to use std::filesystem
-std::vector<int> LinuxParser::Pids() {
+std::vector<int> LinuxParser::Pids()
+{
   std::vector<int> pids;
-  DIR* directory = opendir(kProcDirectory.c_str());
-  struct dirent* file;
-  while ((file = readdir(directory)) != nullptr) {
+  DIR *directory = opendir(kProcDirectory.c_str());
+  struct dirent *file;
+  while ((file = readdir(directory)) != nullptr)
+  {
     // Is this a directory?
-    if (file->d_type == DT_DIR) {
+    if (file->d_type == DT_DIR)
+    {
       // Is every character of the name a digit?
       std::string filename(file->d_name);
-      if (std::all_of(filename.begin(), filename.end(), isdigit)) {
+      if (std::all_of(filename.begin(), filename.end(), isdigit))
+      {
         int pid = std::stoi(filename);
         pids.push_back(pid);
       }
@@ -66,8 +77,36 @@ std::vector<int> LinuxParser::Pids() {
   return pids;
 }
 
-// TODO: Read and return the system memory utilization
-float LinuxParser::MemoryUtilization() { return 0.0; }
+// DONE: Read and return the system memory utilization
+float LinuxParser::MemoryUtilization()
+{
+  std::string line, key, value;
+  float memTotal, memFree;
+  std::ifstream stream(kProcDirectory + kMeminfoFilename);
+  if (stream.is_open())
+  {
+    while (std::getline(stream, line))
+    {
+      std::replace(line.begin(), line.end(), ':', ' ');
+      std::istringstream lineStream(line);
+      while (lineStream >> key >> value)
+      {
+        ;
+        if (key == "MemTotal")
+        {
+          memTotal = std::stof(value);
+        }
+        if (key == "MemFree")
+        {
+          memFree = std::stof(value);
+          break;
+        }
+      }
+    }
+  }
+  return (memTotal - memFree) / memTotal;
+}
+
 
 // TODO: Read and return the system uptime
 long LinuxParser::UpTime() { return 0; }
