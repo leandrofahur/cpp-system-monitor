@@ -75,30 +75,30 @@ float LinuxParser::MemoryUtilization() {
     while (std::getline(filestream, line)) {
       std::replace(line.begin(), line.end(), ':', ' ');
       std::istringstream linestream(line);
-      while (linestream >> key >> value) {
-        if (key == "MemTotal") {
-          memTotal = value;
-        }
-        if (key == "MemFree") {
-          memFree = value;
-          break;
-        }
+      linestream >> key >> value;
+      if (key == "MemTotal") {
+        memTotal = value;
+      }
+      if (key == "MemFree") {
+        memFree = value;
+        break;
       }
     }
   }
-  return (memTotal - memFree) / memTotal;
+  return (float)(memTotal - memFree) / (float)memTotal;
 }
 
 long LinuxParser::UpTime() {
-  long seg1, seg2;
+  long seg;
   std::string line;
   std::ifstream filestream(kProcDirectory + kUptimeFilename);
   if (filestream.is_open()) {
     std::getline(filestream, line);
+    line.replace(line.begin(),line.end(),'.',' ');
     std::istringstream linestream(line);
-    linestream >> seg1 >> seg2;
+    linestream >> seg;
   }
-  return seg1 - seg2;
+  return seg;
 }
 
 long LinuxParser::Jiffies() {
@@ -128,7 +128,9 @@ long LinuxParser::ActiveJiffies(int pid) {
   return totalTime;
 }
 
-long LinuxParser::ActiveJiffies() { return LinuxParser::Jiffies() - LinuxParser::IdleJiffies(); }
+long LinuxParser::ActiveJiffies() {
+  return LinuxParser::Jiffies() - LinuxParser::IdleJiffies();
+}
 
 long LinuxParser::IdleJiffies() {
   std::vector<std::string> cpuUtilization = LinuxParser::CpuUtilization();
@@ -147,9 +149,8 @@ vector<string> LinuxParser::CpuUtilization() {
     std::getline(filestream, line);
     std::stringstream sstream(line);
     while (std::getline(sstream, line, ' ')) {
-      if(line == "cpu" || line == ""){
-      }
-      else {
+      if (line == "cpu" || line == "") {
+      } else {
         buffer.push_back(line);  // std::cout << line << std::endl;
       }
     }

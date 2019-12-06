@@ -13,29 +13,18 @@ using std::vector;
 
 Process::Process(int pid) {
     this->pid_ = pid;
-    this->user_ = LinuxParser::User(this->pid_);
-    this->command_ = LinuxParser::Command(this->pid_);
 }
 
 int Process::Pid() { return this->pid_; }
 
 float Process::CpuUtilization() {
-    float jiffieStart, jiffieEnd, uptimeStart, upTimeEnd;
+
+    float activeJiffie = (float)LinuxParser::ActiveJiffies();
+    float upTime = (float)LinuxParser::UpTime();
+    float upTimePid = (float)LinuxParser::UpTime(this->pid_);
+    float seconds = (upTime - upTimePid) / (float)sysconf(_SC_CLK_TCK);
     
-    jiffieStart = (float)LinuxParser::Jiffies();
-    uptimeStart = (float)LinuxParser::UpTime(this->pid_);
-
-    unsigned int microsseconds = 1000;
-    usleep(microsseconds);
-
-    jiffieEnd = (float)LinuxParser::Jiffies();
-    upTimeEnd = (float)LinuxParser::UpTime(this->pid_);
-
-    if((upTimeEnd - uptimeStart) <= 0){
-        return 0.0f;
-    }
-    
-    return (jiffieEnd - jiffieStart)/(upTimeEnd - uptimeStart);
+    return (activeJiffie / (float)sysconf(_SC_CLK_TCK) / seconds);
 }
 
 string Process::Command() { return this->command_; }
@@ -49,5 +38,5 @@ long int Process::UpTime() { return LinuxParser::UpTime(this->pid_); }
 bool Process::operator<(Process const& a) const { 
     long myRam = std::stol(LinuxParser::Ram(this->pid_));
     long otherRam = std::stol(LinuxParser::Ram(a.pid_));
-    return myRam > otherRam;
+    return myRam < otherRam;
 }

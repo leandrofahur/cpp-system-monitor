@@ -3,22 +3,21 @@
 #include "processor.h"
 #include "linux_parser.h"
 
+
+
 // TODO: Return the aggregate CPU utilization
 float Processor::Utilization() { 
-    
-    jiffiesStart = (float)LinuxParser::Jiffies();
-    activeJiffiesStart = (float)LinuxParser::ActiveJiffies();
+        
+    jiffies = (float)LinuxParser::Jiffies();
+    activeJiffies = (float)LinuxParser::ActiveJiffies();
 
-    unsigned int microsseconds = 1000000;
-    usleep(microsseconds);
+    float JiffiesDiff = jiffies - prevJiffies;
+    float activeJiffiesDiff = activeJiffies - prevActiveJiffies;
 
-    jiffiesEnd = (float)LinuxParser::Jiffies();
-    activeJiffiesEnd = (float)LinuxParser::ActiveJiffies();
+    if(prevJiffies == 0 && prevActiveJiffies == 0) {
+        prevJiffies = jiffies;
+        prevActiveJiffies = activeJiffies;
+    }
 
-
-    if((activeJiffiesEnd - activeJiffiesStart) <= 0) {
-        return 0.0f;
-    } 
-
-    return ((jiffiesEnd - jiffiesStart)/(activeJiffiesEnd - activeJiffiesStart))*0.01;
+    return (activeJiffiesDiff / JiffiesDiff);
 }
