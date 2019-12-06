@@ -1,23 +1,30 @@
 #include <unistd.h>
 
-#include "processor.h"
 #include "linux_parser.h"
-
-
+#include "processor.h"
 
 // TODO: Return the aggregate CPU utilization
-float Processor::Utilization() { 
-        
-    jiffies = (float)LinuxParser::Jiffies();
-    activeJiffies = (float)LinuxParser::ActiveJiffies();
+float Processor::Utilization() {
+  //   if (prevJiffies == 0) {
+  //     prevJiffies = jiffies;
+  //   }
 
-    float JiffiesDiff = jiffies - prevJiffies;
-    float activeJiffiesDiff = activeJiffies - prevActiveJiffies;
+  //   if (prevActiveJiffies == 0) {
+  //     prevActiveJiffies = activeJiffies;
+  //   }
 
-    if(prevJiffies == 0 && prevActiveJiffies == 0) {
-        prevJiffies = jiffies;
-        prevActiveJiffies = activeJiffies;
-    }
+  jiffies = (float)LinuxParser::Jiffies();
+  activeJiffies = (float)LinuxParser::ActiveJiffies();
 
-    return (activeJiffiesDiff / JiffiesDiff);
+  float JiffiesDiff = jiffies - prevJiffies;
+  float activeJiffiesDiff = activeJiffies - prevActiveJiffies;
+
+  prevJiffies = jiffies;
+  prevActiveJiffies = activeJiffies;
+
+  if (JiffiesDiff == 0) {
+    return 0.0f;
+  }
+
+  return (activeJiffiesDiff / JiffiesDiff);
 }
