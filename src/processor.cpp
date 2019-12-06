@@ -3,6 +3,9 @@
 #include "linux_parser.h"
 #include "processor.h"
 
+float prevJiffies = (float)LinuxParser::Jiffies();
+float prevActiveJiffies = (float)LinuxParser::ActiveJiffies();
+
 // TODO: Return the aggregate CPU utilization
 float Processor::Utilization() {
   //   if (prevJiffies == 0) {

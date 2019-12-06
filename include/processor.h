@@ -3,8 +3,8 @@
 
 #include "linux_parser.h"
 
-float prevJiffies = (float)LinuxParser::Jiffies();
-float prevActiveJiffies = (float)LinuxParser::ActiveJiffies();
+// float prevJiffies = (float)LinuxParser::Jiffies();
+// float prevActiveJiffies = (float)LinuxParser::ActiveJiffies();
 
 class Processor {
  public:

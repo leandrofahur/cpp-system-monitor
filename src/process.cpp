@@ -13,6 +13,7 @@ using std::vector;
 
 Process::Process(int pid) {
     this->pid_ = pid;
+    this->command_ = LinuxParser::Command(this->pid_);
 }
 
 int Process::Pid() { return this->pid_; }
@@ -31,7 +32,7 @@ string Process::Command() { return this->command_; }
 
 string Process::Ram() { return LinuxParser::Ram(this->pid_); }
 
-string Process::User() { return this->user_; }
+string Process::User() { return LinuxParser::User(this->pid_); }
 
 long int Process::UpTime() { return LinuxParser::UpTime(this->pid_); }
 

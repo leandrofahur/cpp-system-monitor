@@ -75,13 +75,14 @@ float LinuxParser::MemoryUtilization() {
     while (std::getline(filestream, line)) {
       std::replace(line.begin(), line.end(), ':', ' ');
       std::istringstream linestream(line);
-      linestream >> key >> value;
-      if (key == "MemTotal") {
-        memTotal = value;
-      }
-      if (key == "MemFree") {
-        memFree = value;
-        break;
+      while (linestream >> key >> value) {
+        if (key == "MemTotal") {
+          memTotal = value;
+        }
+        if (key == "MemFree") {
+          memFree = value;
+          break;
+        }
       }
     }
   }
@@ -94,7 +95,7 @@ long LinuxParser::UpTime() {
   std::ifstream filestream(kProcDirectory + kUptimeFilename);
   if (filestream.is_open()) {
     std::getline(filestream, line);
-    line.replace(line.begin(),line.end(),'.',' ');
+    // line.replace(line.begin(),line.end(),'.',' ');
     std::istringstream linestream(line);
     linestream >> seg;
   }
@@ -193,12 +194,11 @@ int LinuxParser::RunningProcesses() {
 
 string LinuxParser::Command(int pid) {
   std::string line;
-  std::ifstream filestream(kProcDirectory + std::to_string(pid) +
-                           kCmdlineFilename);
+  std::ifstream filestream(kProcDirectory + to_string(pid) + kCmdlineFilename);
   if (filestream.is_open()) {
     std::getline(filestream, line);
     if (line == "") {
-      return "";
+      return "None";
     }
     return line;
   }
@@ -216,7 +216,7 @@ string LinuxParser::Ram(int pid) {
       while (linestream >> key >> value) {
         if (key == "VmSize") {
           std::stringstream ram;
-          ram << std::fixed << std::setprecision(2) << stof(value) / 1000;
+          ram << std::fixed << std::setprecision(3) << stof(value) / 1000;
           return ram.str();
         }
       }
@@ -236,12 +236,11 @@ string LinuxParser::Uid(int pid) {
       while (linestream >> key >> value) {
         if (key == "Uid") {
           return value;
-          break;
         }
       }
     }
   }
-  return string();
+  return string("");
 }
 
 string LinuxParser::User(int pid) {
