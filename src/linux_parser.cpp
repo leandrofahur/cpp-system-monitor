@@ -122,20 +122,62 @@ long LinuxParser::UpTime()
   return seconds;
 }
 
-long LinuxParser::Jiffies() { return 0; }
+long LinuxParser::Jiffies() {
+  std::vector<std::string> cpuUtilization = LinuxParser::CpuUtilization();
+  long jiffies{0};
+  for (int i = kUser_; i <= kSteal_; i++) {
+    jiffies += std::stol(cpuUtilization[i]);
+  }
+  return jiffies;
+}
 
-// TODO: Read and return the number of active jiffies for a PID
-// REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::ActiveJiffies(int pid[[maybe_unused]]) { return 0; }
+long LinuxParser::ActiveJiffies(int pid) {
+  std::vector<std::string> buffer;
+  std::string line;
+  long totalTime{0};
+  std::ifstream filestream(kProcDirectory + std::to_string(pid) +
+                           kStatFilename);
+  if (filestream.is_open()) {
+    std::getline(filestream, line);
+    std::stringstream sstream(line);
+    while (std::getline(sstream, line, ' ')) {
+      buffer.push_back(line);  // std::cout << line << std::endl;
+    }
+    totalTime = std::stol(buffer[13]) + std::stol(buffer[14]) +
+                std::stol(buffer[15]) + std::stol(buffer[16]);
+  }
+  return totalTime;
+}
 
-// TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { return 0; }
+long LinuxParser::ActiveJiffies() {
+  return LinuxParser::Jiffies() - LinuxParser::IdleJiffies();
+}
 
-// TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { return 0; }
+long LinuxParser::IdleJiffies() {
+  std::vector<std::string> cpuUtilization = LinuxParser::CpuUtilization();
+  long idleJiffies{0};
+  for (int i = kIdle_; i <= kIOwait_; i++) {
+    idleJiffies += std::stol(cpuUtilization[i]);
+  }
+  return idleJiffies;
+}
 
-// TODO: Read and return CPU utilization
-std::vector<std::string> LinuxParser::CpuUtilization() { return {}; }
+std::vector<std::string> LinuxParser::CpuUtilization() {
+  std::vector<std::string> buffer;
+  std::string line;
+  std::ifstream filestream(kProcDirectory + kStatFilename);
+  if (filestream.is_open()) {
+    std::getline(filestream, line);
+    std::stringstream sstream(line);
+    while (std::getline(sstream, line, ' ')) {
+      if (line == "cpu" || line == "") {
+      } else {
+        buffer.push_back(line);  // std::cout << line << std::endl;
+      }
+    }
+  }
+  return buffer;
+}
 
 int LinuxParser::TotalProcesses()
 {
